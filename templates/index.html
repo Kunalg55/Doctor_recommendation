@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Recommendation System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: url('/static/images/medical2.jpg') no-repeat center center; /* Ensure the image is centered */
+            background-size: cover; /* The image covers the entire browser window */
+            padding: 0;
+            margin: 0;
+            color: #333;
+        }
+
+        /* Header Styles */
+        header {
+            padding: 50px 0;
+            text-align: center;
+            color: rgb(0, 0, 0);
+            background-color: rgba(255, 255, 255, 0.8); /* Light background for readability */
+            border-bottom: 2px solid #007bff; /* Blue border at the bottom */
+            position: relative; /* Position relative for z-index */
+            z-index: 1; /* Ensures header is above the scrolling background */
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header p {
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Container Styles */
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            position: relative; /* Position relative for z-index */
+            z-index: 1; /* Ensures content is above the scrolling background */
+        }
+
+        /* Autocomplete Dropdown Styles */
+        .autocomplete-items {
+            border: 1px solid #ced4da;
+            max-height: 200px;
+            overflow-y: auto;
+            border-radius: 5px;
+            background-color: #fff;
+            z-index: 1000;
+            position: absolute;
+            width: 100%;
+            top: 100%;
+        }
+
+        .autocomplete-item {
+            padding: 10px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom: 1px solid #ced4da;
+        }
+
+        .autocomplete-item:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            width: 100%;
+            padding: 10px;
+            font-size: 1.2rem;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Icon Styles */
+        .icon {
+            margin-right: 8px;
+        }
+
+        /* Banner Image Styles */
+        .banner-image {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Information Section Styles */
+        .info-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5rem;
+            }
+            header p {
+                font-size: 1.5rem;
+            }
+            .container {
+                padding: 15px;
+            }
+            .btn-primary {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Find the Right Specialist</h1>
+        <p>Your health is our priority</p>
+    </header>
+
+    <div class="container">
+        <h2 class="text-center mb-4"><i class="fas fa-heartbeat icon"></i> Doctor Recommendation System</h2>
+        <form method="POST" action="/">
+            <div class="mb-3 position-relative">
+                <label for="symptoms" class="form-label"><i class="fas fa-stethoscope icon"></i> Enter Symptoms (comma-separated):</label>
+                <input type="text" id="symptoms" name="symptoms" class="form-control" autocomplete="off" placeholder="Start typing symptoms...">
+                <div id="autocomplete-list" class="autocomplete-items"></div>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search icon"></i> Submit</button>
+        </form>
+
+        {% if error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+        {% endif %}
+        
+        {% if recommendations %}
+            <h4 class="mt-4"><i class="fas fa-user-md icon"></i> Recommended Specialists:</h4>
+            {% if recommendations.error %}
+                <div class="alert alert-warning">{{ recommendations.error }}</div>
+            {% elif recommendations.recommendations %}
+                <ul class="list-group mt-2">
+                    {% for specialist in recommendations.recommendations %}
+                        <li class="list-group-item">{{ specialist }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endif %}
+
+    </div>
+
+    <div class="info-section container">
+        <h3 class="text-center">Why Choose Us?</h3>
+        <p>We provide a seamless experience to connect you with the best medical specialists based on your symptoms. Our recommendation system is designed to give you accurate and quick results to ensure you receive the best possible care.</p>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Doctor Recommendation System. All rights reserved.</p>
+        <p>Contact us: <a href="mailto:capstone.grp55@gmail.com">capstone.grp55@gmail.com</a></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#symptoms").on("input", function() {
+                let currentText = $(this).val();
+                let lastCommaIndex = currentText.lastIndexOf(',');
+                let query = currentText.substring(lastCommaIndex + 1).trim();
+
+                if (query.length > 0) {
+                    $.ajax({
+                        url: "/autocomplete",
+                        data: { query: query },
+                        success: function(data) {
+                            let autocompleteList = $("#autocomplete-list");
+                            autocompleteList.empty();
+                            data.forEach(function(item) {
+                                autocompleteList.append("<div class='autocomplete-item'>" + item + "</div>");
+                            });
+                        }
+                    });
+                } else {
+                    $("#autocomplete-list").empty();
+                }
+            });
+
+            $(document).on("click", ".autocomplete-item", function() {
+                let symptom = $(this).text();
+                let currentText = $("#symptoms").val();
+                let lastCommaIndex = currentText.lastIndexOf(',');
+
+                if (lastCommaIndex !== -1) {
+                    currentText = currentText.substring(0, lastCommaIndex + 1) + ' ';
+                } else {
+                    currentText = '';
+                }
+
+                $("#symptoms").val(currentText + symptom + ', ');
+                $("#autocomplete-list").empty();
+            });
+        });
+    </script>
+</body>
+</html>
